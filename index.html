@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6d28d9">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <title>Gtracks - Daily Goal Tracker</title>
+    <meta name="description" content="Track your daily goals with style and stay productive.">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Phosphor icons for elegant UI -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Chart.js for Statistics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Supabase for Real Database -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <div id="app">
+        <!-- Background elements for glassmorphism -->
+        <div class="bg-shape shape-1"></div>
+        <div class="bg-shape shape-2"></div>
+        <div class="bg-shape shape-3"></div>
+
+        <!-- Auth Page -->
+        <div id="auth-page" class="page active">
+            <div class="glass-panel auth-container">
+                <div class="auth-header">
+                    <i class="ph ph-target-bold brand-icon"></i>
+                    <h1>Gtracks</h1>
+                    <p>Elevate your daily routine</p>
+                </div>
+
+                <div id="auth-error"
+                    style="color: var(--danger); text-align: center; font-size: 0.95rem; font-weight: 500; display: none; background: rgba(239, 68, 68, 0.1); padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">
+                </div>
+
+                <form id="signup-form">
+                    <div class="input-group">
+                        <i class="ph ph-user"></i>
+                        <input type="text" id="name" placeholder="Full Name" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="ph ph-envelope-simple"></i>
+                        <input type="email" id="email" placeholder="Email Address" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="ph ph-lock-key"></i>
+                        <input type="password" id="password" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="btn primary-btn">
+                        <span>Get Started</span>
+                        <i class="ph ph-arrow-right"></i>
+                    </button>
+                    
+                    <div style="display: flex; align-items: center; gap: 1rem; margin: 0.5rem 0; color: var(--text-secondary); font-size: 0.9rem;">
+                        <hr style="flex-grow: 1; border-color: var(--glass-border);">
+                        <span>or</span>
+                        <hr style="flex-grow: 1; border-color: var(--glass-border);">
+                    </div>
+                    
+                    <button type="button" id="google-signin-btn" class="btn secondary-btn" style="background: rgba(255,255,255,0.05); border-color: var(--glass-border); color: var(--text-primary); margin-top: 0.5rem;">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style="width: 20px; height: 20px;">
+                        <span>Continue with Google</span>
+                    </button>
+                </form>
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="#" id="toggle-login">Sign in</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Setup Page -->
+        <div id="profile-setup-page" class="page">
+            <div class="profile-setup-wrapper">
+                <div class="glass-panel auth-container profile-setup-card" style="max-width: 520px;">
+                    <div class="auth-header">
+                        <h1 class="profile-title-glow">Set Up Your Profile</h1>
+                        <p>Tell us a bit about yourself to personalize your experience.</p>
+                    </div>
+
+                    <form id="profile-setup-form">
+                        <!-- Profile Picture Upload -->
+                        <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+                            <div id="profile-pic-wrapper" class="profile-pic-upload" title="Upload profile picture">
+                                <img id="profile-pic-preview" src="" alt="" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                <i class="ph ph-user" id="profile-pic-placeholder" style="font-size: 3rem; color: var(--text-secondary);"></i>
+                                <div class="profile-pic-overlay">
+                                    <i class="ph ph-camera" style="font-size: 1.3rem;"></i>
+                                </div>
+                                <input type="file" id="profile-pic-input" accept="image/*" style="display: none;">
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <i class="ph ph-user"></i>
+                            <input type="text" id="profile-username" placeholder="Choose a Username" required>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; align-items: flex-end;">
+                            <div class="input-group" style="flex: 2; margin-bottom: 0;">
+                                <i class="ph ph-calendar"></i>
+                                <input type="date" id="profile-dob" required min="2000-01-01" max="2020-12-31" style="color: var(--text-primary);">
+                            </div>
+                            <div class="input-group" style="flex: 1; margin-bottom: 0; pointer-events: none; opacity: 0.7;">
+                                <i class="ph ph-hourglass-medium"></i>
+                                <input type="text" id="profile-age" placeholder="Age" readonly>
+                            </div>
+                        </div>
+
+                        <div class="input-group profile-select-group">
+                            <i class="ph ph-graduation-cap"></i>
+                            <select id="profile-standard" required>
+                                <option value="" disabled selected>Which standard do you study?</option>
+                                <option value="6">6th Standard</option>
+                                <option value="7">7th Standard</option>
+                                <option value="8">8th Standard</option>
+                                <option value="9">9th Standard</option>
+                                <option value="10">10th Standard</option>
+                                <option value="11-sci">11th Standard (Science)</option>
+                                <option value="11-com">11th Standard (Commerce)</option>
+                                <option value="11-arts">11th Standard (Arts)</option>
+                                <option value="12-sci">12th Standard (Science)</option>
+                                <option value="12-com">12th Standard (Commerce)</option>
+                                <option value="12-arts">12th Standard (Arts)</option>
+                                <option value="ug">Undergraduate (College)</option>
+                                <option value="pg">Postgraduate</option>
+                                <option value="other">Other / Working Professional</option>
+                            </select>
+                        </div>
+
+                        <div style="display: flex; justify-content: center; margin-top: 0.5rem;">
+                            <button type="submit" class="btn primary-btn" style="min-width: 200px;">
+                                <span>SUBMIT</span>
+                                <i class="ph ph-arrow-right"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    <!-- Pricing Page -->
+        <div id="pricing-page" class="page">
+            <div class="pricing-container">
+                <div style="text-align: center; margin-bottom: 3rem;">
+                    <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Choose your plan</h1>
+                    <p style="color: var(--text-secondary); font-size: 1.1rem;">Unlock the full power of Gtracks AI and maximize your daily productivity.</p>
+                </div>
+                
+                <div class="pricing-cards">
+                    <!-- Free Plan -->
+                    <div class="pricing-card glass-panel" style="flex: 1; min-width: 280px;">
+                        <h3>Basic</h3>
+                        <div class="price">₹0<span>/forever</span></div>
+                        <p class="plan-desc">For casual users looking to build habits.</p>
+                        <ul class="plan-features">
+                            <li><i class="ph ph-check"></i> Basic Goal Tracking</li>
+                            <li><i class="ph ph-check"></i> Calendar Reminders</li>
+                            <li><i class="ph ph-check" style="color: var(--accent-1);"></i> <strong>Gtracks AI Access</strong> (30m)</li>
+                            <li><i class="ph ph-warning" style="color: var(--warning);"></i> 30 minutes daily limit</li>
+                        </ul>
+                        <button class="btn secondary-btn select-plan-btn" data-plan="free" style="width: 100%; margin-top: auto;">Continue for Free</button>
+                    </div>
+
+                    <!-- Monthly Plan -->
+                    <div class="pricing-card glass-panel featured-plan" style="flex: 1; min-width: 280px;">
+                        <div class="popular-badge">Most Popular</div>
+                        <h3>Pro Monthly</h3>
+                        <div class="price">₹300<span>/mo</span></div>
+                        <p class="plan-desc">Full access to everything, billed monthly.</p>
+                        <ul class="plan-features">
+                            <li><i class="ph ph-check" style="color: var(--accent-1);"></i> Unlimited Daily Usage</li>
+                            <li><i class="ph ph-check" style="color: var(--accent-1);"></i> <strong>Full Gtracks AI Access</strong></li>
+                            <li><i class="ph ph-check" style="color: var(--accent-1);"></i> Advanced Statistics</li>
+                            <li><i class="ph ph-check" style="color: var(--accent-1);"></i> Priority Support</li>
+                        </ul>
+                        <button class="btn primary-btn select-plan-btn" data-plan="monthly" style="width: 100%; margin-top: auto;">Get Pro Monthly</button>
+                    </div>
+
+                    <!-- Annual Plan -->
+                    <div class="pricing-card glass-panel" style="flex: 1; min-width: 280px;">
+                        <div class="discount-badge">Save ₹2600</div>
+                        <h3>Pro Annual</h3>
+                        <div class="price">₹1000<span>/yr</span></div>
+                        <p class="plan-desc">Best value for long-term productivity.</p>
+                        <ul class="plan-features">
+                            <li><i class="ph ph-check" style="color: var(--accent-2);"></i> Unlimited Daily Usage</li>
+                            <li><i class="ph ph-check" style="color: var(--accent-2);"></i> <strong>Full Gtracks AI Access</strong></li>
+                            <li><i class="ph ph-check" style="color: var(--accent-2);"></i> Advanced Statistics</li>
+                            <li><i class="ph ph-check" style="color: var(--accent-2);"></i> Priority Support</li>
+                        </ul>
+                        <button class="btn secondary-btn select-plan-btn" data-plan="annual" style="width: 100%; margin-top: auto;">Get Pro Annual</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div id="dashboard-page" class="page">
+            <div class="dashboard-layout">
+                <aside class="sidebar glass-panel">
+                    <div class="user-profile">
+                        <div class="avatar" id="user-avatar">G</div>
+                        <div class="user-info">
+                            <h3 id="display-name">User Name</h3>
+                            <p id="user-plan-display">Free Plan</p>
+                        </div>
+                    </div>
+
+                    <nav class="side-nav">
+                        <a href="#" class="nav-item active" data-view="today"><i class="ph ph-check-circle"></i> Today's
+                            Goals</a>
+                        <a href="#" class="nav-item" data-view="calendar"><i class="ph ph-calendar-blank"></i>
+                            Calendar</a>
+                        <a href="#" class="nav-item" data-view="statistics"><i class="ph ph-chart-line-up"></i>
+                            Statistics</a>
+                        <a href="#" class="nav-item" data-view="profile"><i class="ph ph-user-circle"></i> About Me</a>
+                        <a href="#" class="nav-item" data-view="settings"><i class="ph ph-gear"></i> Settings</a>
+                    </nav>
+
+                    <button class="btn secondary-btn sign-out-btn" id="sign-out">
+                        <i class="ph ph-sign-out"></i>
+                        <span>Sign Out</span>
+                    </button>
+                </aside>
+
+                <main class="main-content">
+                    <header class="dashboard-header glass-panel">
+                        <div class="header-titles">
+                            <h2 id="view-title">Today's Goals</h2>
+                            <p id="current-date">Monday, May 2</p>
+                        </div>
+                        <div class="progress-container" id="main-progress">
+                            <div class="progress-stats">
+                                <span>Progress</span>
+                                <span id="progress-percentage">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-fill"></div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div class="view-content-container">
+                        <!-- View: Today's Goals -->
+                        <div id="view-today" class="view-section active">
+                            <div class="goals-container glass-panel">
+                                <form id="add-goal-form" class="add-goal-box">
+                                    <button type="button" class="icon-btn"><i class="ph ph-plus"></i></button>
+                                    <input type="text" id="new-goal-input" placeholder="What's your focus for today?"
+                                        required>
+                                    <button type="submit" class="btn primary-btn sm-btn">Add</button>
+                                </form>
+
+                                <div class="goals-list" id="goals-list">
+                                    <!-- Goals will be injected here -->
+                                </div>
+
+                                <div class="empty-state" id="empty-state">
+                                    <i class="ph ph-leaf"></i>
+                                    <p>No goals for today yet. Set your intention!</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- View: Calendar -->
+                        <div id="view-calendar" class="view-section">
+                            <div class="glass-panel p-2 flex-col gap-1" style="flex-grow: 1; overflow-y: auto;">
+                                <div class="calendar-controls">
+                                    <select id="cal-month" class="form-select"></select>
+                                    <select id="cal-year" class="form-select"></select>
+                                    <button id="cal-today-btn" class="btn secondary-btn sm-btn">Today</button>
+                                </div>
+                                <div class="calendar-weekdays">
+                                    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                                </div>
+                                <div class="calendar-grid" id="calendar-grid"></div>
+
+                                <div id="reminder-section" class="reminder-section">
+                                    <h4 id="selected-date-text">Selected Date</h4>
+                                    <form id="add-reminder-form" class="add-goal-box" style="margin-top: 1rem;">
+                                        <select id="calendar-entry-type" class="form-select"
+                                            style="border: none; background: transparent; color: var(--text-primary); outline: none; padding-left: 0.5rem; padding-right: 0.5rem; cursor: pointer;">
+                                            <option value="reminder">Reminder</option>
+                                            <option value="goal">Goal</option>
+                                        </select>
+                                        <input type="text" id="reminder-input" placeholder="Add for this date..."
+                                            required>
+                                        <button type="submit" class="btn primary-btn sm-btn">Save</button>
+                                    </form>
+                                    <div class="reminders-list" id="reminders-list"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- View: Statistics -->
+                        <div id="view-statistics" class="view-section">
+                            <div class="glass-panel p-2 flex-col gap-1" style="flex-grow: 1;">
+                                <div class="stats-controls">
+                                    <button class="btn secondary-btn sm-btn active" data-range="day">Day</button>
+                                    <button class="btn secondary-btn sm-btn" data-range="week">Week</button>
+                                    <button class="btn secondary-btn sm-btn" data-range="month">Month</button>
+                                </div>
+                                <div class="chart-container"
+                                    style="position: relative; flex-grow: 1; width:100%; min-height: 300px;">
+                                    <canvas id="progressChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- View: About Me (Profile) -->
+                        <div id="view-profile" class="view-section">
+                            <div class="glass-panel p-2 flex-col gap-2" style="flex-grow: 1; overflow-y: auto;">
+                                <div style="display: flex; justify-content: center; margin-bottom: 2rem;">
+                                    <div id="edit-profile-pic-wrapper" class="profile-pic-upload" title="Change profile picture" style="width: 120px; height: 120px;">
+                                        <img id="edit-profile-pic-preview" src="" alt="" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                        <i class="ph ph-user" id="edit-profile-pic-placeholder" style="font-size: 4rem; color: var(--text-secondary);"></i>
+                                        <div class="profile-pic-overlay">
+                                            <i class="ph ph-camera" style="font-size: 1.5rem;"></i>
+                                        </div>
+                                        <input type="file" id="edit-profile-pic-input" accept="image/*" style="display: none;">
+                                    </div>
+                                </div>
+
+                                <form id="edit-profile-form" style="max-width: 500px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 1.5rem;">
+                                    <div class="input-group">
+                                        <i class="ph ph-user"></i>
+                                        <input type="text" id="edit-username" placeholder="Username" required>
+                                    </div>
+
+                                    <div style="display: flex; gap: 1rem; align-items: flex-end;">
+                                        <div class="input-group" style="flex: 2;">
+                                            <i class="ph ph-calendar"></i>
+                                            <input type="date" id="edit-dob" required min="1950-01-01" max="2025-12-31" style="color: var(--text-primary);">
+                                        </div>
+                                        <div class="input-group" style="flex: 1; pointer-events: none; opacity: 0.7;">
+                                            <i class="ph ph-hourglass-medium"></i>
+                                            <input type="text" id="edit-age" placeholder="Age" readonly>
+                                        </div>
+                                    </div>
+
+                                    <div class="input-group profile-select-group">
+                                        <i class="ph ph-graduation-cap"></i>
+                                        <select id="edit-standard" required>
+                                            <option value="" disabled selected>Which standard do you study?</option>
+                                            <option value="6">6th Standard</option>
+                                            <option value="7">7th Standard</option>
+                                            <option value="8">8th Standard</option>
+                                            <option value="9">9th Standard</option>
+                                            <option value="10">10th Standard</option>
+                                            <option value="11-sci">11th Standard (Science)</option>
+                                            <option value="11-com">11th Standard (Commerce)</option>
+                                            <option value="11-arts">11th Standard (Arts)</option>
+                                            <option value="12-sci">12th Standard (Science)</option>
+                                            <option value="12-com">12th Standard (Commerce)</option>
+                                            <option value="12-arts">12th Standard (Arts)</option>
+                                            <option value="ug">Undergraduate (College)</option>
+                                            <option value="pg">Postgraduate</option>
+                                            <option value="other">Other / Working Professional</option>
+                                        </select>
+                                    </div>
+
+                                    <div style="display: flex; justify-content: center; margin-top: 1rem;">
+                                        <button type="submit" class="btn primary-btn" style="min-width: 200px;">
+                                            <span>SAVE CHANGES</span>
+                                            <i class="ph ph-floppy-disk"></i>
+                                        </button>
+                                    </div>
+                                    <p id="profile-save-success" style="color: var(--success); text-align: center; display: none; font-weight: 600;">Profile updated successfully!</p>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- View: Settings -->
+                        <div id="view-settings" class="view-section">
+                            <div class="glass-panel p-2 flex-col gap-2" style="flex-grow: 1; overflow-y: auto;">
+                                <h3>Appearance</h3>
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <i class="ph ph-moon"></i>
+                                        <span>Dark Mode</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" id="theme-toggle" checked>
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+
+                                <hr class="divider">
+
+                                <div class="setting-item flex-col gap-1" style="align-items: flex-start;">
+                                    <div class="setting-info">
+                                        <i class="ph ph-database"></i>
+                                        <span>Cloud Database (Supabase)</span>
+                                    </div>
+                                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Connect to your own Supabase project for real cloud storage.</p>
+                                    <div class="input-group" style="width: 100%; margin-bottom: 0.5rem;">
+                                        <input type="text" id="supabase-url" placeholder="Supabase Project URL" style="padding-left: 1rem;">
+                                    </div>
+                                    <div class="input-group" style="width: 100%; margin-bottom: 1rem;">
+                                        <input type="password" id="supabase-key" placeholder="Supabase Anon Key" style="padding-left: 1rem;">
+                                    </div>
+                                    <button class="btn primary-btn sm-btn" id="save-db-config" style="width: 100%;">
+                                        <i class="ph ph-cloud-arrow-up"></i>
+                                        <span>Connect Cloud DB</span>
+                                    </button>
+                                    <p id="db-status-msg" style="font-size: 0.8rem; margin-top: 0.5rem; display: none; font-weight: 600;"></p>
+                                </div>
+
+                                <hr class="divider">
+
+                                <div class="help-section">
+                                    <h3><i class="ph ph-info"></i> Help & About</h3>
+                                    <p><strong>Gtracks</strong> is your personal daily goal tracker designed to help you
+                                        stay productive and organized.</p>
+                                    <br>
+                                    <p><strong>Features:</strong></p>
+                                    <ul>
+                                        <li><strong>Today's Goals:</strong> Keep track of your daily tasks. Check them
+                                            off as you complete them to see your progress bar fill up.</li>
+                                        <li><strong>Calendar:</strong> Plan ahead from 2026 to 2036. Select any date to
+                                            add or manage reminders for upcoming events.</li>
+                                        <li><strong>Statistics:</strong> Visualize your goal completion rate. View
+                                            progress for a specific Day, Week, or Month.</li>
+                                        <li><strong>Settings:</strong> Customize your experience with themes and access
+                                            help information.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tracks AI Floating Agent -->
+    <div class="tracks-ai-fab" id="tracks-ai-fab">
+        <i class="ph-fill ph-sparkle tracks-ai-icon" style="font-size: 2rem;"></i>
+    </div>
+
+    <div class="tracks-ai-popup" id="tracks-ai-popup">
+        <div class="popup-header">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <i class="ph-fill ph-sparkle tracks-ai-icon" style="font-size: 1.5rem;"></i>
+                <span style="font-weight: 600;">Tracks AI</span>
+            </div>
+            <button class="icon-btn" id="close-ai-popup"
+                style="background: none; border: none; cursor: pointer; color: var(--text-primary); font-size: 1.2rem;"><i
+                    class="ph ph-x"></i></button>
+        </div>
+        <div class="chat-container" id="ai-chat-box" style="padding: 1rem; min-height: 0;">
+            <div class="chat-message ai-message">
+                <div class="chat-avatar" style="background: transparent;">
+                    <i class="ph-fill ph-sparkle tracks-ai-icon" style="font-size: 1.8rem;"></i>
+                </div>
+                <div class="chat-bubble">Hi! I'm <strong>Tracks AI</strong>. Ask me anything about productivity, study
+                    plans, or organizing your day!</div>
+            </div>
+        </div>
+        <div class="chat-input-area"
+            style="padding: 1rem; border-top: 1px solid var(--glass-border); background: rgba(0,0,0,0.2);">
+            <form id="ai-chat-form" style="display: flex; gap: 0.5rem;">
+                <input type="text" id="ai-input" placeholder="Message Tracks AI..." required class="form-input"
+                    style="flex-grow: 1; padding: 0.6rem;">
+                <button type="submit" class="btn primary-btn sm-btn" style="padding: 0 0.8rem;"><i
+                        class="ph ph-paper-plane-right"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Mock Google Auth Modal -->
+    <div id="google-modal-overlay" class="modal-overlay" style="display: none;">
+        <div class="google-modal glass-panel" id="google-modal">
+            <div id="google-step-1">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style="width: 40px; margin-bottom: 1rem;">
+                    <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Choose an account</h2>
+                    <p style="color: var(--text-secondary);">to continue to Gtracks</p>
+                </div>
+                <div class="google-account-list">
+                    <div class="google-account-item" data-email="personal@gmail.com" data-name="User (Personal)">
+                        <div class="avatar" style="width: 36px; height: 36px; font-size: 1rem;">U</div>
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="font-weight: 600;">User (Personal)</span>
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">personal@gmail.com</span>
+                        </div>
+                    </div>
+                    <div class="google-account-item" data-email="work@gmail.com" data-name="User (Work)">
+                        <div class="avatar" style="width: 36px; height: 36px; font-size: 1rem; background: var(--accent-2);">U</div>
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="font-weight: 600;">User (Work)</span>
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">work@gmail.com</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <button class="btn secondary-btn sm-btn" id="cancel-google-btn">Cancel</button>
+                </div>
+            </div>
+
+            <div id="google-step-2" style="display: none;">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style="width: 40px; margin-bottom: 1rem;">
+                    <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Welcome</h2>
+                    <div class="google-selected-account" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.8rem; border-radius: 16px; border: 1px solid var(--glass-border); margin-top: 0.5rem;">
+                        <i class="ph ph-user"></i>
+                        <span id="selected-google-email" style="font-size: 0.9rem;">email@gmail.com</span>
+                    </div>
+                </div>
+                
+                <form id="google-password-form" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); text-align: center;">Enter a password to secure your Gtracks account.</p>
+                    <div class="input-group">
+                        <i class="ph ph-lock-key"></i>
+                        <input type="password" id="google-password" placeholder="Enter password" required>
+                    </div>
+                    <p id="google-auth-error" style="color: var(--danger); font-size: 0.85rem; text-align: center; display: none;"></p>
+                    <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                        <button type="button" class="btn secondary-btn" id="back-google-btn" style="flex: 1;">Back</button>
+                        <button type="submit" class="btn primary-btn" style="flex: 1;">Continue</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW setup failed'));
+            });
+        }
+    </script>
+</body>
+</html>

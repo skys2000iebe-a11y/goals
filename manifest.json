@@ -1,0 +1,16 @@
+{
+  "name": "Gtracks - Daily Goal Tracker",
+  "short_name": "Gtracks",
+  "description": "Your personal daily goal tracker and AI agent.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f1015",
+  "theme_color": "#6d28d9",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512"
+    }
+  ]
+}
