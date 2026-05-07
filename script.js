@@ -167,6 +167,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveDbConfigBtn = document.getElementById('save-db-config');
     const dbStatusMsg = document.getElementById('db-status-msg');
 
+    // AI Knowledge Elements
+    const aiKnowledgeTextarea = document.getElementById('ai-custom-knowledge');
+    const saveAiKnowledgeBtn = document.getElementById('save-ai-knowledge');
+    const aiKnowledgeStatus = document.getElementById('ai-knowledge-status');
+
     // --- State ---
     let currentUser = null;
     let entries = {}; 
@@ -463,6 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
             signupForm.reset();
             hideError();
             isLoginMode = false;
+            if (aiKnowledgeTextarea) aiKnowledgeTextarea.value = '';
             navItems[0].click();
         }, 400);
     });
@@ -667,6 +673,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderTodayGoals();
                 initCalendar();
                 enforceFreePlanLimits();
+
+                // Load user-specific AI knowledge
+                if (aiKnowledgeTextarea) {
+                    aiKnowledgeTextarea.value = localStorage.getItem(`ai_knowledge_${currentUser.email}`) || '';
+                }
+                aiMessages[0].content = getAiSystemPrompt();
             }
         }, 400);
     }
@@ -1230,15 +1242,46 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function getAiSystemPrompt() {
+        const customKnowledge = currentUser ? localStorage.getItem(`ai_knowledge_${currentUser.email}`) : '';
+        let basePrompt = "You are Tracks AI, an intelligent, empathetic productivity assistant integrated into the Gtracks app. \n\nOfficial Information:\n- Founder, CEO, and CTO: Soham Misra.\n- Mission: Help users achieve their daily goals and manage productivity.\n- Pricing Plans: Pro Monthly (₹300 INR) and Pro Annual (₹1000 INR).\n- Basic Plan: Free with 30-minute daily AI limit.\n\nKeep responses concise, motivating, and professional.";
+        
+        if (customKnowledge) {
+            basePrompt += `\n\nUser's Custom Knowledge & Context:\n${customKnowledge}`;
+        }
+        return basePrompt;
+    }
+
     let aiMessages = [
-        { role: "system", content: "You are Tracks AI, an intelligent, empathetic productivity assistant integrated into the Gtracks app. You help users manage their daily goals, solve personal productivity problems, and plan their exams or schedules. Keep responses concise and motivating." }
+        { role: "system", content: getAiSystemPrompt() }
     ];
+
+    // Handle Knowledge Saving
+    if (saveAiKnowledgeBtn) {
+        saveAiKnowledgeBtn.addEventListener('click', () => {
+            if (!currentUser) return;
+
+            const knowledge = aiKnowledgeTextarea.value.trim();
+            localStorage.setItem(`ai_knowledge_${currentUser.email}`, knowledge);
+            
+            // Re-initialize system prompt with new knowledge
+            aiMessages[0].content = getAiSystemPrompt();
+
+            aiKnowledgeStatus.style.display = 'block';
+            setTimeout(() => {
+                aiKnowledgeStatus.style.display = 'none';
+            }, 3000);
+            
+            // Sync to database
+            API.saveEntries(currentUser.email, entries);
+        });
+    }
 
     function appendMessage(role, text) {
         const msgDiv = document.createElement('div');
         msgDiv.className = `chat-message ${role === 'user' ? 'user-message' : 'ai-message'}`;
         
-        let avatarIcon = role === 'user' ? '<i class="ph ph-user"></i>' : '<i class="ph-fill ph-sparkle tracks-ai-icon" style="font-size: 1.8rem;"></i>';
+        let avatarIcon = role === 'user' ? '<i class="ph ph-user"></i>' : '<span class="ai-text-avatar">AI</span>';
         
         let formattedText = escapeHTML(text)
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -1265,7 +1308,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const msgDiv = document.createElement('div');
             msgDiv.className = 'chat-message ai-message';
             msgDiv.id = loadingId;
-            msgDiv.innerHTML = `<div class="chat-avatar" style="background: transparent;"><i class="ph-fill ph-sparkle tracks-ai-icon" style="font-size: 1.8rem;"></i></div><div class="chat-bubble"><i class="ph ph-spinner ph-spin" style="margin-right: 5px;"></i> Thinking...</div>`;
+            msgDiv.innerHTML = `<div class="chat-avatar" style="background: transparent;"><span class="ai-text-avatar">AI</span></div><div class="chat-bubble"><i class="ph ph-spinner ph-spin" style="margin-right: 5px;"></i> Thinking...</div>`;
             chatBox.appendChild(msgDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
 
