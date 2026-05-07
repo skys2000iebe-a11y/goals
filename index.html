@@ -213,14 +213,12 @@
                     </div>
 
                     <nav class="side-nav">
-                        <a href="#" class="nav-item active" data-view="today"><i class="ph ph-check-circle"></i> Today's
-                            Goals</a>
-                        <a href="#" class="nav-item" data-view="calendar"><i class="ph ph-calendar-blank"></i>
-                            Calendar</a>
-                        <a href="#" class="nav-item" data-view="statistics"><i class="ph ph-chart-line-up"></i>
-                            Statistics</a>
-                        <a href="#" class="nav-item" data-view="profile"><i class="ph ph-user-circle"></i> About Me</a>
-                        <a href="#" class="nav-item" data-view="settings"><i class="ph ph-gear"></i> Settings</a>
+                        <a href="#" class="nav-item active" data-view="today"><i class="ph ph-check-circle"></i> <span>Goals</span></a>
+                        <a href="#" class="nav-item" data-view="calendar"><i class="ph ph-calendar-blank"></i> <span>Calendar</span></a>
+                        <a href="#" class="nav-item" data-view="statistics"><i class="ph ph-chart-line-up"></i> <span>Stats</span></a>
+                        <a href="#" class="nav-item" data-view="profile"><i class="ph ph-user-circle"></i> <span>About</span></a>
+                        <a href="#" class="nav-item" data-view="train-ai"><i class="ph ph-brain"></i> <span>Train AI</span></a>
+                        <a href="#" class="nav-item" data-view="settings"><i class="ph ph-gear"></i> <span>Settings</span></a>
                     </nav>
 
                     <button class="btn secondary-btn sign-out-btn" id="sign-out">
@@ -376,6 +374,41 @@
                             </div>
                         </div>
 
+                        <!-- View: Train AI -->
+                        <div id="view-train-ai" class="view-section">
+                            <div class="glass-panel p-2 flex-col gap-2" style="flex-grow: 1; overflow-y: auto;">
+                                <div style="text-align: center; margin-bottom: 2rem;">
+                                    <h2 style="font-size: 2rem; margin-bottom: 0.5rem;"><i class="ph-fill ph-brain" style="color: var(--accent-1);"></i> Train your AI</h2>
+                                    <p style="color: var(--text-secondary);">Personalize Tracks AI to align with your unique goals, study style, and daily habits.</p>
+                                </div>
+
+                                <div class="setting-item flex-col gap-1" style="align-items: flex-start; background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 20px; border: 1px solid var(--glass-border);">
+                                    <div class="setting-info" style="margin-bottom: 0.5rem;">
+                                        <i class="ph ph-sparkle" style="color: #facc15; font-size: 1.5rem;"></i>
+                                        <span style="font-size: 1.2rem; font-weight: 600;">Custom Knowledge Base</span>
+                                    </div>
+                                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem;">Enter facts, preferences, or specific instructions. For example, tell the AI about your dream career, your current struggle areas, or how you prefer to be motivated.</p>
+                                    
+                                    <div class="input-group" style="width: 100%; margin-bottom: 1.5rem;">
+                                        <textarea id="ai-custom-knowledge" placeholder="Example: I'm currently preparing for the JEE exams. I struggle with Organic Chemistry. Please use a strict, disciplined tone when reminding me to study." style="width: 100%; min-height: 200px; padding: 1.2rem; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 16px; color: var(--text-primary); font-family: inherit; resize: vertical; line-height: 1.6; font-size: 1rem;"></textarea>
+                                    </div>
+                                    
+                                    <button class="btn primary-btn" id="save-ai-knowledge" style="width: 100%; padding: 1rem;">
+                                        <i class="ph ph-magic-wand" style="font-size: 1.2rem;"></i>
+                                        <span style="font-size: 1.1rem;">Update AI Intelligence</span>
+                                    </button>
+                                    <p id="ai-knowledge-status" style="font-size: 0.9rem; margin-top: 1rem; display: none; color: var(--success); font-weight: 600; text-align: center;">Intelligence updated! Tracks AI is now syncing with your new memory.</p>
+                                </div>
+
+                                <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(109, 40, 217, 0.1); border-radius: 16px; border: 1px dashed var(--accent-1);">
+                                    <h4 style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; color: var(--accent-1);">
+                                        <i class="ph ph-lightbulb"></i> Pro Tip
+                                    </h4>
+                                    <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">The more specific you are, the better Tracks AI can help you. You can update this information at any time as your goals evolve.</p>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- View: Settings -->
                         <div id="view-settings" class="view-section">
                             <div class="glass-panel p-2 flex-col gap-2" style="flex-grow: 1; overflow-y: auto;">
@@ -390,6 +423,8 @@
                                         <span class="slider round"></span>
                                     </label>
                                 </div>
+
+                                <hr class="divider">
 
                                 <hr class="divider">
 
